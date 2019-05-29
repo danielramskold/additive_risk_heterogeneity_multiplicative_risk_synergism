@@ -1,1 +1,13 @@
-# additive_risk_heterogeneity_multiplicative_risk_synergy
+Simulations python3 code:
+* spike_in_plots13_ordered.py contains code for five models of spiking in risk factors
+* spike_in_plot_3loci.py is an example of three risk factors
+* spike_in_plots_thresholdforfive.py is an example of a multifactorial threshold model
+
+Rheumatoid arthritis python3 code:
+* calc_risk_square_modelrandomizations.py is code for generating odds ratios, including for two permutation controls
+* fewsnps_obstoexp_distribution.ipynb is a Jupyter notebook for matching known risk SNPs to additive or multiplicative effect, based on the output from calc_risk_square_modelrandomizations.py
+* eira_randomised_distibutions.ipynb plots all SNPs from the output of calc_risk_square_modelrandomizations.py
+* SE.ipynb plots putput from GEISA
+
+Other:
+* dr_tools.py is support code (library) for the other ones
