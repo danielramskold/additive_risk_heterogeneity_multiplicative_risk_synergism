@@ -8,7 +8,7 @@ Rheumatoid arthritis python3 code:
 * calc_risk_square_modelrandomizations.py is code for generating odds ratios, including for two permutation controls
 * fewsnps_obstoexp_distribution.ipynb is a Jupyter notebook for matching known risk SNPs to additive or multiplicative effect, based on the output from calc_risk_square_modelrandomizations.py
 * eira_randomised_distibutions.ipynb plots all SNPs from the output of calc_risk_square_modelrandomizations.py
-* SE.ipynb plots putput from GEISA
+* SE.ipynb plots the output from GEISA
 
 Other:
 * dr_tools.py is support code (library) for the other ones
