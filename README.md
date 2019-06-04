@@ -1,7 +1,8 @@
 Simulations python3 code:
-* spike_in_plots13_ordered.py contains code for five models of spiking in risk factors
+* spike_in_plots13_ordered.py contains code for five models of spiking in risk factors, including correlation calculation
 * spike_in_plot_3loci.py is an example of three risk factors
 * spike_in_plots_thresholdforfive.py is an example of a multifactorial threshold model
+* spike_in_plots14_hetcalc.py is a failed attempt to employ a formula for the relative risk of the heterogeneity model 
 
 Rheumatoid arthritis python3 code:
 * calc_risk_square_modelrandomizations.py is code for generating odds ratios, including for two permutation controls
