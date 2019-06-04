@@ -12,3 +12,4 @@ Rheumatoid arthritis python3 code:
 
 Other:
 * dr_tools.py is support code (library) for the other ones
+* fivemodels_tworiskfactors_giveORandRR.py does not produce plots, but instead allows the user to play around with numbers to try out the five models of spike_in_plots13_ordered.py
