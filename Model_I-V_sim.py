@@ -130,13 +130,19 @@ if '__main__' == __name__:
     
     print('parameters:', o)
     
-    print('OR11:', OR11)
-    print('OR10:', OR10)
-    print('OR01:', OR01)
-    print('OR01 * OR10:', OR01*OR10)
-    print('OR01 + OR10 - 1:', OR01 + OR10 - 1)
     print('RR11:', RR11)
     print('RR10:', RR10)
     print('RR01:', RR01)
     print('RR01 * RR10:', RR01*RR10)
     print('RR01 + RR10 - 1:', RR01 + RR10 - 1)
+    
+    print('OR11:', OR11)
+    print('OR10:', OR10)
+    print('OR01:', OR01)
+    print('OR01 * OR10:', OR01*OR10)
+    print('OR01 + OR10 - 1:', OR01 + OR10 - 1)
+    
+    print('√(f)est:', (OR11 - OR10 - OR01 + 1)/(OR10-1)/(OR01-1))
+    print('RERI:', OR11 - OR10 - OR01 + 1)
+    print('AP:', (OR11 - OR10 - OR01 + 1)/OR11)
+    print('Synergy index:', (OR11 - 1)/(OR10-1 + OR01-1))
