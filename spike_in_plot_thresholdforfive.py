@@ -39,7 +39,10 @@ def shuffle(df, colname, select_rows=None):
 def invert(v):
     return 1/v
 
-def calc_observed_expected(df, useRR):
+def signedsquare(v):
+    return v**2 if v>=0 else -v**2
+
+def calc_observed_expected(df, useRR, use_z, t):
     maxA = 1
     maxB = 1
     maxAB = maxA * maxB
@@ -52,12 +55,17 @@ def calc_observed_expected(df, useRR):
     df['A0B0'] = (maxA-df['A']) * (maxB-df['B'])
     
     ORorRR = RR if useRR else OR
+    a = ORorRR(df, 'A1B0', maxAB)-1
+    b = ORorRR(df, 'A0B1', maxAB)-1
     expected_OR11_additive = ORorRR(df, 'A1B0', maxAB) + ORorRR(df, 'A0B1', maxAB) - 1
     expected_OR11_multiplicative = ORorRR(df, 'A1B0', maxAB) * ORorRR(df, 'A0B1', maxAB)
-    expected_OR11_het = ORorRR(df, 'A1B0', maxAB) + ORorRR(df, 'A0B1', maxAB) - 2 - (ORorRR(df, 'A1B0', maxAB)-1) * (ORorRR(df, 'A0B1', maxAB)-1)
-    observed_OR11 = ORorRR(df, 'A1B1', maxAB)
-    return (observed_OR11/expected_OR11_multiplicative), (observed_OR11/expected_OR11_additive)
-
+    coefficient_threshold = ((t-1)/(5-1))**0.5
+    guess_OR11_threshold = 1 + a + b + a*b*coefficient_threshold
+    observed_OR11 = ORorRR(df, 'A1B1', maxAB) 
+    if use_z:
+        #return signedsquare((observed_OR11 - expected_OR11_additive)/(expected_OR11_multiplicative - expected_OR11_additive)),
+        return (observed_OR11 - expected_OR11_additive)/(expected_OR11_multiplicative - expected_OR11_additive),
+    return (observed_OR11/expected_OR11_multiplicative), (observed_OR11/expected_OR11_additive), observed_OR11/guess_OR11_threshold
 
 def separate_cause_sim(a_rel, b_rel, n, bg_freq1, bgfreq2, prevalence):
     df_a = pandas.DataFrame()
@@ -151,8 +159,8 @@ def threshold_three_of_five(a_rel, b_rel, n, bg_freq1, bg_freq2, prevalence, thr
     df['outcome'] = df['a_cases'].astype(int) + df['b_cases'].astype(int) + df['c_cases'].astype(int) + df['d_cases'].astype(int) + df['e_cases'].astype(int) >= threshold
     return df
 
-def add_to_dict(d, key_prefix, values):
-    keys = [key_prefix+'\n'+suffix for suffix in ('mult', 'add', 'het')]
+def add_to_dict(d, key_prefix, values, use_z):
+    keys = [key_prefix+'\n'+suffix for suffix in (('z',) if use_z else('mult', 'add', 'thr'))]
     for k, v in zip(keys, values):
         if k not in d: d[k] = []
         d[k].append(v)
@@ -163,6 +171,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('calc', choices=['RR', 'OR'])
 parser.add_argument('protective', choices=['no', 'one', 'two'])
 parser.add_argument('-n', default=[1000, 1000000], type=int, nargs=2)
+parser.add_argument('-z', '--add_mult_fraction', action='store_true', dest='z')
+parser.add_argument('--notches', action='store_true')
 o = parser.parse_args()
 
 nr, n= o.n
@@ -190,15 +200,28 @@ for prevalence in (0.005,):
             df = threshold_three_of_five(a_rel, b_rel, n, bg_freq1, bg_freq2, prevalence, threshold)
             prev_obs[ '%.3f\n3of5\n%i'%(prevalence, threshold)].append(numpy.mean(df['outcome']))
             #print(threshold, prev_obs, prevalence)
-            add_to_dict(log2_obs_to_exp, '%.3f\n3of5\n%i'%(prevalence, threshold), calc_observed_expected(df, o.calc=='RR'))
+            add_to_dict(log2_obs_to_exp, '%.3f\n3of5\n%i'%(prevalence, threshold), calc_observed_expected(df, o.calc=='RR', o.z, threshold), o.z)
 
 print({k:numpy.median(V) for k,V in prev_obs.items()})
 
 xarr = list(range(1,1+len(log2_obs_to_exp)))
 pyplot.gca().axhline(1)
-pyplot.boxplot(list(log2_obs_to_exp.values()), sym='')
+if o.z: pyplot.gca().axhline(0)
+pyplot.boxplot(list(log2_obs_to_exp.values()), sym='', notch=o.notches)
 pyplot.xticks(xarr, list(log2_obs_to_exp.keys()), fontsize=2)
-pyplot.ylabel('observed/expected for %s(A1B1)'%o.calc)
-pyplot.ylim(0, 2.5)
-#pyplot.xlim(min(xarr)-1, min(xarr)+16)
-pyplot.savefig('plot_for_threeoffive_%s_%sprotective.pdf'%(o.calc, o.protective))
+if o.z:
+    #pyplot.ylabel('signedsquare((observed-expadd)/(expmult-expadd)) for %s(A1B1)'%o.calc)
+    pyplot.ylabel('(observed-expadd)/(expmult-expadd) for %s(A1B1)'%o.calc)
+    pyplot.ylim(-2, 3)
+    #pyplot.plot([1,5], [0,1], 'k-')
+    
+    xarr = [x for x in numpy.arange(1, 5.00001, 0.02)]
+    yarr = [math.sqrt((x-1)/4) for x in xarr]
+    pyplot.plot(xarr, yarr, 'k-')
+    
+    pyplot.savefig('plot_for_threeoffive_z_%s_%sprotective%s.pdf'%(o.calc, o.protective, '_notched' if o.notches else ''))
+else:
+    pyplot.ylabel('observed/expected for %s(A1B1)'%o.calc)
+    pyplot.ylim(0, 2.5)
+    #pyplot.xlim(min(xarr)-1, min(xarr)+16)
+    pyplot.savefig('plot_for_threeoffive_%s_%sprotective%s.pdf'%(o.calc, o.protective, '_notched' if o.notches else ''))
