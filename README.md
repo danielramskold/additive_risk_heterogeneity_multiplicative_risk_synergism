@@ -13,3 +13,5 @@ Rheumatoid arthritis python3 code:
 Other:
 * dr_tools.py is support code (library) for the other ones
 * Model_I-V_sim.py does not produce plots, but instead allows the user to play around with numbers to try out the five models of spike_in_plots13_ordered.py
+
+All programs run in Python 3.7, and some have been tested in Python 3.6.
